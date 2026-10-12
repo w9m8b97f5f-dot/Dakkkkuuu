@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vigilance — Classic Eye & Drowsiness Monitor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --gold-primary: #d4af37;
+            --gold-light: #f3e5ab;
+            --gold-dark: #997a15;
+            --bg-deep: #0f0d0a;
+            --bg-card: #1a1612;
+            --crimson-alert: #9e1b1b;
+        }
+
+        body {
+            background-color: var(--bg-deep);
+            background-image: 
+                radial-gradient(circle at 50% 20%, rgba(212, 175, 55, 0.08) 0%, transparent 60%),
+                radial-gradient(circle at 10% 90%, rgba(120, 80, 20, 0.07) 0%, transparent 50%),
+                repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.01) 0px, rgba(255, 255, 255, 0.01) 2px, transparent 2px, transparent 8px);
+            color: #f4ece1;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .font-classic-title {
+            font-family: 'Cinzel', serif;
+            letter-spacing: 0.08em;
+        }
+
+        .font-classic-serif {
+            font-family: 'Cormorant Garamond', serif;
+        }
+
+        /* Ornate Classic Borders */
+        .classic-frame {
+            background: linear-gradient(145deg, #1d1813, #13100c);
+            border: 1px solid rgba(212, 175, 55, 0.35);
+            box-shadow: 
+                0 20px 50px rgba(0, 0, 0, 0.8),
+                inset 0 0 25px rgba(212, 175, 55, 0.05);
+            position: relative;
+        }
+
+        .classic-frame::before {
+            content: '';
+            position: absolute;
+            inset: 5px;
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            pointer-events: none;
+            border-radius: inherit;
+        }
+
+        /* Corner Ornaments */
+        .corner-ornament {
+            width: 18px;
+            height: 18px;
+            border-color: var(--gold-primary);
+            position: absolute;
+            pointer-events: none;
+            z-index: 20;
+            transition: all 0.3s ease;
+        }
+        .corner-tl { top: 10px; left: 10px; border-top: 2px solid; border-left: 2px solid; }
+        .corner-tr { top: 10px; right: 10px; border-top: 2px solid; border-right: 2px solid; }
+        .corner-bl { bottom: 10px; left: 10px; border-bottom: 2px solid; border-left: 2px solid; }
+        .corner-br { bottom: 10px; right: 10px; border-bottom: 2px solid; border-right: 2px solid; }
+
+        /* Classic Gold Button */
+        .btn-gold {
+            background: linear-gradient(180deg, #e5c158 0%, #b88f20 100%);
+            color: #15110c;
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            border: 1px solid #f9e498;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3), inset 0 1px 0 rgba(255,255,255,0.4);
+            transition: all 0.25s ease;
+        }
+        .btn-gold:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 22px rgba(212, 175, 55, 0.45), inset 0 1px 0 rgba(255,255,255,0.6);
+            filter: brightness(1.06);
+        }
+        .btn-gold:active:not(:disabled) {
+            transform: translateY(0px);
+        }
+        .btn-gold:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Alarm Pulsing Effect */
+        @keyframes crimsonPulse {
+            0%, 100% {
+                box-shadow: 0 0 25px rgba(220, 38, 38, 0.6), inset 0 0 30px rgba(220, 38, 38, 0.35);
+                border-color: #ef4444;
+            }
+            50% {
+                box-shadow: 0 0 55px rgba(220, 38, 38, 0.95), inset 0 0 50px rgba(220, 38, 38, 0.6);
+                border-color: #fca5a5;
+            }
+        }
+
+        .alarm-active {
+            animation: crimsonPulse 1s infinite ease-in-out !important;
+        }
+
+        /* Mirror video horizontally for natural webcam experience */
+        .mirror-video {
+            transform: scaleX(-1);
+        }
+
+        /* Custom Slider Styling */
+        input[type="range"] {
+            accent-color: #d4af37;
+        }
+
+        /* Classic Floating Dust & Golden Glow Effects */
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) translateX(0px); opacity: 0.25; }
+            50% { transform: translateY(-25px) translateX(12px); opacity: 0.65; }
+        }
+        .classic-particle {
+            position: fixed;
+            border-radius: 50%;
+            background: radial-gradient(circle, #f3e5ab 0%, rgba(212, 175, 55, 0) 70%);
+            pointer-events: none;
+            z-index: 0;
+            animation: floatSlow 7s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="flex flex-col justify-between min-h-screen p-4 sm:p-6 md:p-8 select-none relative">
+
+    <!-- Classic Ambient Golden Particles Effect -->
+    <div class="classic-particle w-3 h-3 top-1/4 left-10" style="animation-delay: 0s;"></div>
+    <div class="classic-particle w-4 h-4 top-2/3 left-1/4" style="animation-delay: 1.5s;"></div>
+    <div class="classic-particle w-2.5 h-2.5 top-1/3 right-16" style="animation-delay: 3s;"></div>
+    <div class="classic-particle w-5 h-5 bottom-16 right-1/3" style="animation-delay: 2.2s;"></div>
+
+    <!-- Hidden Audio Element for uthja.mp3 -->
+    <audio id="uthjaAudio" src="uthja.mp3" preload="auto" loop></audio>
+
+    <header class="max-w-5xl w-full mx-auto text-center mb-6 relative z-10">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-amber-500/30 bg-amber-950/20 text-amber-300/90 text-xs tracking-widest uppercase mb-3">
+            <span id="aiStatusDot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+            <span id="aiStatusText">Initializing Optical Neural Engine...</span>
+        </div>
+
+        <h1 class="font-classic-title text-2xl sm:text-4xl md:text-5xl font-bold text-amber-100 tracking-wider drop-shadow-[0_2px_10px_rgba(212,175,55,0.25)]">
+            OCULUS <span class="text-amber-400">VIGILANCE</span>
+        </h1>
+        <p class="font-classic-serif italic text-lg sm:text-xl text-amber-200/70 mt-1">
+            “Eternal wakefulness is the price of wisdom — close thine eyes, and the bell shall toll.”
+        </p>
+        <div class="w-48 h-px bg-gradient-to-r from-transparent via-amber-500/60 to-transparent mx-auto mt-3"></div>
+    </header>
+
+    <main class="max-w-5xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 items-center my-auto relative z-10">
+        
+        <!-- Left Column: Ornate Camera Viewport (7 cols on desktop) -->
+        <section class="lg:col-span-7 flex flex-col">
+            <div id="viewportFrame" class="classic-frame rounded-xl p-3 sm:p-4 transition-all duration-300">
+                <div class="corner-ornament corner-tl"></div>
+                <div class="corner-ornament corner-tr"></div>
+                <div class="corner-ornament corner-bl"></div>
+                <div class="corner-ornament corner-br"></div>
+
+                <!-- Top Frame Bar -->
+                <div class="flex items-center justify-between px-2 pb-2.5 mb-2 border-b border-amber-500/20 text-xs text-amber-200/70">
+                    <div class="flex items-center gap-2">
+                        <span class="font-classic-title uppercase tracking-wider text-amber-400 font-semibold">Optical Chamber</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span id="facesCountBadge" class="px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-amber-300 font-mono">Faces: 0</span>
+                        <span id="fpsCounter" class="font-mono text-amber-300/60">STANDBY</span>
+                    </div>
+                </div>
+
+                <!-- Video & Overlay Container -->
+                <div class="relative w-full aspect-[4/3] bg-[#090806] rounded-lg overflow-hidden border border-amber-500/25 flex items-center justify-center">
+                    
+                    <!-- Live Webcam Video -->
+                    <video id="webcam" class="w-full h-full object-cover mirror-video hidden" autoplay playsinline muted></video>
+                    
+                    <!-- Eye Tracking Landmark Canvas Overlay -->
+                    <canvas id="overlayCanvas" class="absolute inset-0 w-full h-full object-cover mirror-video pointer-events-none hidden"></canvas>
+
+                    <!-- Initial Permission / Standby Overlay -->
+                    <div id="cameraPromptOverlay" class="inset-0 flex flex-col items-center justify-center p-6 text-center z-10">
+                        <div class="w-16 h-16 rounded-full border border-amber-400/40 bg-amber-500/10 flex items-center justify-center mb-4 shadow-inner">
+                            <svg class="w-8 h-8 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </div>
+                        <h2 class="font-classic-title text-lg sm:text-xl text-amber-100 mb-2">Grant Optical Access</h2>
+                        <p class="text-xs sm:text-sm text-amber-200/70 max-w-md mb-6 leading-relaxed">
+                            Allow camera permission to monitor up to 4 people simultaneously in real time. Close your eyes and the sentinel alarm shall sound.
+                        </p>
+                        <button id="startCameraBtn" class="btn-gold px-6 py-3 rounded-lg text-sm tracking-wider uppercase flex items-center gap-2 cursor-pointer">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                            <span id="startBtnText">Grant Camera Permission</span>
+                        </button>
+                        <p id="cameraErrorMsg" class="text-red-400 text-xs mt-4 hidden max-w-sm bg-red-950/50 border border-red-500/40 px-3 py-2 rounded"></p>
+                    </div>
+
+                    <!-- Wake Up Crimson Flash Overlay -->
+                    <div id="wakeUpBanner" class="absolute inset-x-4 top-4 bg-red-950/90 border-2 border-red-500 text-red-100 px-4 py-3 rounded-lg shadow-2xl flex items-center justify-between transition-all duration-200 opacity-0 pointer-events-none transform -translate-y-2 z-20">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl animate-bounce">🔔</span>
+                            <div>
+                                <div class="font-classic-title font-bold text-sm sm:text-base tracking-wider text-red-200">UTH JA! (WAKE UP!)</div>
+                                <div id="wakeUpSubtext" class="text-xs text-red-300">Eyes detected closed!</div>
+                            </div>
+                        </div>
+                        <span class="px-2 py-0.5 text-[10px] font-mono uppercase bg-red-800/80 rounded border border-red-400">ALARM ACTIVE</span>
+                    </div>
+                </div>
+
+                <!-- Bottom Status Bar inside Frame -->
+                <div class="flex flex-wrap items-center justify-between gap-2 pt-3 px-2 text-xs">
+                    <div class="flex items-center gap-2">
+                        <span class="text-amber-200/60">Vigilance State:</span>
+                        <span id="eyeStatusBadge" class="px-2.5 py-0.5 rounded font-medium bg-amber-950/60 text-amber-300 border border-amber-500/30">
+                            Awaiting Camera
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <label class="inline-flex items-center gap-1.5 cursor-pointer text-amber-200/75 hover:text-amber-200">
+                            <input type="checkbox" id="toggleMeshCheck" checked class="rounded accent-amber-500">
+                            <span>Show Eye Contours</span>
+                        </label>
+                        <button id="stopCameraBtn" class="hidden text-red-400 hover:text-red-300 underline text-xs ml-2">Stop Camera</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Column: Multi-Person Ocular Telemetry & Classic Controls (5 cols on desktop) -->
+        <section class="lg:col-span-5 flex flex-col gap-5">
+            
+            <!-- Live Multi-Person Eyelid Telemetry Card -->
+            <div class="classic-frame rounded-xl p-6">
+                <div class="corner-ornament corner-tl"></div>
+                <div class="corner-ornament corner-tr"></div>
+                <div class="corner-ornament corner-bl"></div>
+                <div class="corner-ornament corner-br"></div>
+
+                <div class="flex items-center justify-between border-b border-amber-500/20 pb-3 mb-4">
+                    <h2 class="font-classic-title text-sm sm:text-base text-amber-300 uppercase tracking-wider">
+                        Ocular Telemetry
+                    </h2>
+                    <span id="closedTimerText" class="text-xs font-mono text-amber-200/70">Closed: 0.0s</span>
+                </div>
+
+                <!-- Dynamic Multi-Person Status List -->
+                <div id="multiPersonList" class="space-y-3 mb-5 min-h-[130px] flex flex-col justify-center">
+                    <div class="text-center text-xs text-amber-200/50 italic font-classic-serif text-base">
+                        Activate the Optical Chamber to monitor 1 to 4 observers simultaneously...
+                    </div>
+                </div>
+
+                <!-- Sensitivity & Delay Sliders -->
+                <div class="pt-4 border-t border-amber-500/20 space-y-4 text-xs">
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-amber-200/80">Closure Trigger Delay (Avoid Blinks)</span>
+                            <span id="delayLabel" class="font-mono text-amber-300">0.3 sec</span>
+                        </div>
+                        <input id="delaySlider" type="range" min="0.1" max="1.5" step="0.1" value="0.3" class="w-full cursor-pointer">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-amber-200/80">Eye Closure Sensitivity</span>
+                            <span id="thresholdLabel" class="font-mono text-amber-300">45%</span>
+                        </div>
+                        <input id="thresholdSlider" type="range" min="25" max="75" step="5" value="45" class="w-full cursor-pointer">
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <footer class="max-w-5xl w-full mx-auto mt-8 pt-4 border-t border-amber-500/20 flex flex-col sm:flex-row items-center justify-between text-xs text-amber-200/50 gap-3 relative z-10">
+        <div class="font-classic-serif italic text-sm text-amber-200/70">
+            Classic Dark Academic Sentinel • Real-Time Multi-Person Eye Vigilance
+        </div>
+        <div class="font-classic-title text-amber-400 font-semibold tracking-widest uppercase text-xs sm:text-sm px-4 py-1.5 rounded-full border border-amber-500/30 bg-amber-950/30 shadow-inner">
+            Developed by VSM
+        </div>
+    </footer>
+
+    <script>
+        // DOM Elements
+        const webcam = document.getElementById('webcam');
+        const canvas = document.getElementById('overlayCanvas');
+        const ctx = canvas.getContext('2d');
+        const startCameraBtn = document.getElementById('startCameraBtn');
+        const startBtnText = document.getElementById('startBtnText');
+        const stopCameraBtn = document.getElementById('stopCameraBtn');
+        const cameraPromptOverlay = document.getElementById('cameraPromptOverlay');
+        const cameraErrorMsg = document.getElementById('cameraErrorMsg');
+        const aiStatusDot = document.getElementById('aiStatusDot');
+        const aiStatusText = document.getElementById('aiStatusText');
+        const eyeStatusBadge = document.getElementById('eyeStatusBadge');
+        const viewportFrame = document.getElementById('viewportFrame');
+        const wakeUpBanner = document.getElementById('wakeUpBanner');
+        const wakeUpSubtext = document.getElementById('wakeUpSubtext');
+        const fpsCounter = document.getElementById('fpsCounter');
+        const facesCountBadge = document.getElementById('facesCountBadge');
+        const toggleMeshCheck = document.getElementById('toggleMeshCheck');
+        const multiPersonList = document.getElementById('multiPersonList');
+
+        // Telemetry Controls
+        const closedTimerText = document.getElementById('closedTimerText');
+        const delaySlider = document.getElementById('delaySlider');
+        const delayLabel = document.getElementById('delayLabel');
+        const thresholdSlider = document.getElementById('thresholdSlider');
+        const thresholdLabel = document.getElementById('thresholdLabel');
+
+        // Audio Element
+        const uthjaAudio = document.getElementById('uthjaAudio');
+
+        // State Variables
+        let FaceLandmarkerClass = null;
+        let DrawingUtilsClass = null;
+        let faceLandmarker = null;
+        let drawingUtils = null;
+        let webcamRunning = false;
+        let animationFrameId = null;
+        let eyesClosedStartTime = null;
+        let isAlarmPlaying = false;
+        let lastVideoTime = -1;
+
+        // Smoothing buffer per face index (supports up to 4 people smoothly)
+        const smoothedOpenness = [
+            { left: 100, right: 100 },
+            { left: 100, right: 100 },
+            { left: 100, right: 100 },
+            { left: 100, right: 100 }
+        ];
+
+        // Web Audio API Backup Synthesizer (if uthja.mp3 fails or is missing)
+        let audioCtx = null;
+        let fallbackInterval = null;
+
+        // Update UI Sliders
+        delaySlider.addEventListener('input', () => {
+            delayLabel.textContent = `${parseFloat(delaySlider.value).toFixed(1)} sec`;
+        });
+        thresholdSlider.addEventListener('input', () => {
+            thresholdLabel.textContent = `${thresholdSlider.value}%`;
+        });
+
+        function playFallbackBellChime() {
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                const now = audioCtx.currentTime;
+                const osc1 = audioCtx.createOscillator();
+                const osc2 = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc1.type = 'triangle';
+                osc2.type = 'sine';
+                osc1.frequency.setValueAtTime(587.33, now);
+                osc2.frequency.setValueAtTime(880.
